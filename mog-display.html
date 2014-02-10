@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>MOG Display</title>
+<style>
+body {
+	background-color: #212121;
+	color: #c8c8c8;
+	font-family: helvetica,arial,sans-serif;
+	line-height: 125%;
+}
+section > section {
+	padding-left: 3ex;
+}
+h2 {
+	color: #fc263c;
+}
+ul {
+	list-style: none;
+	color: #a6a6a6;
+	padding-left: 3ex;
+}
+li > span:first-child {
+	color: #ffffff;
+}
+</style>
+<script>
+function displayData(data) {
+	var headingEl = document.createElement("h1");
+	headingEl.textContent = data.screen_name + " " + new Date(data.export_date).toLocaleString();
+	document.title = "MOG "+headingEl.textContent;
+	document.body.appendChild(headingEl);
+	
+	if (data.user_playlists.length) {
+		appendSection(document.body, "Playlists", data.user_playlists, "<span>{{track_name}}</span> {{artist_name}} <i>{{album_name}}</i>");
+	}
+	if (data.artist_favorites.length) {
+		appendSection(document.body, "Artist Favorites", data.artist_favorites, "<span>{{artist_name}}</span>");
+	}
+	if (data.album_favorites.length) {
+		appendSection(document.body, "Album Favorites", data.album_favorites, "<span>{{album_name}}</span> {{artist_name}}");
+	}
+	if (data.track_favorites.length) {
+		appendSection(document.body, "Track Favorites", data.track_favorites, "<span>{{track_name}}</span> {{artist_name}} <i>{{album_name}}</i>");
+	}
+	if (data.playlist_favorites.length) {
+		appendSection(document.body, "Playlist Favorites", data.playlist_favorites, "<span>{{track_name}}</span> {{artist_name}} <i>{{album_name}}</i>");
+	}
+}
+function appendSection(parent, heading, array, template) {
+	var headingTag = "h2",
+		listTag = "ul";
+	if (parent.nodeName.toUpperCase() == "SECTION") {
+		headingTag = "h3";
+		listTag = "ol";
+	}
+	
+	var section = document.createElement("section");
+	
+	var headingEl = document.createElement(headingTag);
+	headingEl.textContent = heading;
+	section.appendChild(headingEl);
+	
+	var listEl = document.createElement(listTag);
+	for (var i=0; i<array.length; ++i) {
+		if (array[i].tracks) {
+			appendSection(section, array[i].name, array[i].tracks, template);
+		} else {
+			appendListItem(listEl, array[i], template);
+		}
+	}
+	section.appendChild(listEl);
+	
+	parent.appendChild(section);
+}
+function appendListItem(listEl, object, template) {
+	var listItem = document.createElement("li");
+	listItem.innerHTML = template.replace(/{{(.+?)}}/g, function replaceMatch(match, propName) {
+		return object[propName];
+	});
+	listEl.appendChild(listItem);
+}
+function readFile(file) {
+	var reader = new FileReader();
+	reader.onload = function(e) {
+		displayData(JSON.parse(e.target.result));
+	};
+	reader.readAsText(file);
+}
+</script>
+</head>
+<body>
+<input type="file" onchange="readFile(this.files[0]); this.remove();">
+</body>
+</html>
