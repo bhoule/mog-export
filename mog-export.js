@@ -45,10 +45,11 @@ function dataIsReadyForExport() {
 }
 
 function exportJSON() {
-    var download = document.createElement('a');
-    download.href = 'data:application/json;charset=utf-8,' + encodeURIComponent( JSON.stringify(exportData, null, '\t') );
-    download.download = 'MOG.'+exportData.screen_name+'.'+new Date().toISOString().substring(0,10)+'.json';
-    download.click();
+    var downloadLink = document.createElement('a');
+    downloadLink.href = 'data:application/json;charset=utf-8,' + encodeURIComponent( JSON.stringify(exportData, null, '\t') );
+    downloadLink.download = 'MOG.'+exportData.screen_name+'.'+new Date().toISOString().substring(0,10)+'.json';
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
 }
 
 function getPlaylistForExport(playlist) {
